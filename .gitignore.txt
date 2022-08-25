@@ -3,5 +3,4 @@
 # Manipulador de Bitmaps
 
 BitMapManipulation/target/
-BitMapManipulation/target
 BitMapManipulation/img_out/*

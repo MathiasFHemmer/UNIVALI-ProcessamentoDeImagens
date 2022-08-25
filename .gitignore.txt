@@ -1,0 +1,6 @@
+
+# Processamento de Imanges
+# Manipulador de Bitmaps
+
+BitMapManipulation/target/
+BitMapManipulation/img_out/*

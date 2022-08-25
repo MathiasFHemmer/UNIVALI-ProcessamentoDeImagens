@@ -1,10 +1,13 @@
 #[macro_use]
 extern crate bmp;
 use bmp::{Image, Pixel};
+use std::fs;
 
-static output_folder:&'static str = "img_out/";
+static output_folder:&'static str = "img_out";
 
 fn main() {
+    fs::create_dir_all(output_folder);
+
     create_first_image("img_01");
     create_second_image("img_02");
     create_third_image("img_03");
@@ -23,7 +26,7 @@ fn create_first_image(file_name: &str){
             img.set_pixel(resolution/2+x, resolution/2+y, px!(255, 255, 255));
         }
     }
-    let _ = img.save(format!("{output_folder}{file_name}"));
+    let _ = img.save(format!("{output_folder}/{file_name}"));
 }
 
 fn create_second_image(file_name: &str){
@@ -43,7 +46,7 @@ fn create_second_image(file_name: &str){
             img.set_pixel(x, resolution/2+y, px!(color, color, color));
         }
     }
-    let _ = img.save(format!("{output_folder}{file_name}"));
+    let _ = img.save(format!("{output_folder}/{file_name}"));
 }
 
 
@@ -68,7 +71,7 @@ fn create_third_image(file_name: &str){
             img.set_pixel(x, resolution/2+y, px!(color, color, color));
         }
     }
-    let _ = img.save(format!("{output_folder}{file_name}"));
+    let _ = img.save(format!("{output_folder}/{file_name}"));
 }
 
 fn create_heart(file_name: &str){
@@ -89,5 +92,5 @@ fn create_heart(file_name: &str){
             }
         }
     }
-    let _ = img.save(format!("{output_folder}{file_name}"));
+    let _ = img.save(format!("{output_folder}/{file_name}"));
 }

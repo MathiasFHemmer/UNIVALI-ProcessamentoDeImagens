@@ -2,7 +2,5 @@
 # Processamento de Imanges
 # Manipulador de Bitmaps
 
-BitMapManipulation/target/
-BitMapManipulation/img_out/
-./target/
-./img_out/
+BitMapManipulator/target/
+BitMapManipulator/img_out/

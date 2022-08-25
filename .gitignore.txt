@@ -4,3 +4,5 @@
 
 BitMapManipulation/target/
 BitMapManipulation/img_out/
+./target/
+./img_out/

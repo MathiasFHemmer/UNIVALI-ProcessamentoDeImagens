@@ -2,14 +2,16 @@
 extern crate bmp;
 use bmp::{Image, Pixel};
 
+static output_folder:&'static str = "img_out/";
+
 fn main() {
-    create_first_image();
-    create_second_image();
-    create_third_image();
-    create_heart();
+    create_first_image("img_01");
+    create_second_image("img_02");
+    create_third_image("img_03");
+    create_heart("img_04");
 }
 
-fn create_first_image(){
+fn create_first_image(file_name: &str){
     let resolution = 256;
     let mut img = Image::new(resolution, resolution);
 
@@ -21,10 +23,10 @@ fn create_first_image(){
             img.set_pixel(resolution/2+x, resolution/2+y, px!(255, 255, 255));
         }
     }
-    let _ = img.save("img.bmp");
+    let _ = img.save(format!("{output_folder}{file_name}"));
 }
 
-fn create_second_image(){
+fn create_second_image(file_name: &str){
     let resolution = 256;
     let mut img = Image::new(resolution, resolution);
 
@@ -41,11 +43,11 @@ fn create_second_image(){
             img.set_pixel(x, resolution/2+y, px!(color, color, color));
         }
     }
-    let _ = img.save("img2.bmp");
+    let _ = img.save(format!("{output_folder}{file_name}"));
 }
 
 
-fn create_third_image(){
+fn create_third_image(file_name: &str){
     let resolution = 256;
     let mut img = Image::new(resolution, resolution);
 
@@ -66,10 +68,10 @@ fn create_third_image(){
             img.set_pixel(x, resolution/2+y, px!(color, color, color));
         }
     }
-    let _ = img.save("img3.bmp");
+    let _ = img.save(format!("{output_folder}{file_name}"));
 }
 
-fn create_heart(){
+fn create_heart(file_name: &str){
     let resolution = 256;
     let mut img = Image::new(resolution, resolution);
     //0..255
@@ -87,5 +89,5 @@ fn create_heart(){
             }
         }
     }
-    let _ = img.save("heart.bmp");
+    let _ = img.save(format!("{output_folder}{file_name}"));
 }

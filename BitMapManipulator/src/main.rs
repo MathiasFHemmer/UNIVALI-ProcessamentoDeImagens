@@ -42,6 +42,9 @@ fn create_second_image(file_name: &str){
             if x==y {
                 color = 255;
             }
+            if x + y == (resolution/2) - 1{
+                color = 255;
+            }
             img.set_pixel(resolution/2 + x, y, px!(color, color, color));
             img.set_pixel(x, resolution/2+y, px!(color, color, color));
         }

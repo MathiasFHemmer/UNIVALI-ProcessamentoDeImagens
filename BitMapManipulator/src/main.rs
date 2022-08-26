@@ -8,10 +8,10 @@ static output_folder:&'static str = "img_out";
 fn main() {
     fs::create_dir_all(output_folder);
 
-    create_first_image("img_01");
-    create_second_image("img_02");
-    create_third_image("img_03");
-    create_heart("img_04");
+    create_first_image("img_01.bmp");
+    create_second_image("img_02.bmp");
+    create_third_image("img_03.bmp");
+    create_heart("img_04.bmp");
 }
 
 fn create_first_image(file_name: &str){

@@ -4,3 +4,7 @@
 
 target/
 img_out/
+debug/
+BitMapManipulator/target/
+BitMapManipulator/img_out/
+BitMapManipulator/debug/

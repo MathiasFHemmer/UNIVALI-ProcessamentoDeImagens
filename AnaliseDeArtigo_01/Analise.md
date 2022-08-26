@@ -11,13 +11,13 @@ um alto volume de dados precisa ser processado por mão de obra insuficiente.
 
 O artigo descreve os diversos processos para criação de cada amostra das etapas que compoem o diagrama geral. A idéia principal é conseguir uma amostra de imgem capaz de falicitar a extração da imagem original, das possíveis massas que indicariam o cancer.
 
-![Diagrama geral da imagem](./diagrama_geral.png)
+![Diagrama geral da imagem](./img/diagrama_geral.png)
 
 # Testes e Resultados:
 
 A imagem a seguir mostra os tres estágios do processamento da imagem:
 
-![imagem1](./amostra_01.png)
+![imagem1](./img/amostra_01.png)
 
 **a**. Mostra a imagem da mamografia original. **b**. Mostra a imagem segmentada, trazendo as regioes de interece em contorno **c**. Mostra a extração das regioes de contorno, com base em um limite definido.
 
@@ -27,7 +27,7 @@ Para poder validar as extrações geradas, as imagens foram testadas, comparando
 
 Através da razão da diferença entre o calculado e o previsto com o total da imagem pode-se obter uma estimativa de erro. O mesmo pode ser feito com a razão em relação a região marcada manualmente:
 
-![imagem2](./equacao_validacao.png)
+![imagem2](./img/equacao_validacao.png)
 
 Ambas as equações servem como medida de eficiência do algorítimo. 
 

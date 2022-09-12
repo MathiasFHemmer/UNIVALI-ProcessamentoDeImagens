@@ -1,0 +1,47 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'ruido_gaussiano'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=ruido_gaussiano",
+                    "--package=ruido_gaussiano"
+                ],
+                "filter": {
+                    "name": "ruido_gaussiano",
+                    "kind": "bin"
+                }
+            },
+            //"args": ["input/original.png", "gaussian-noise", "-s", "64"],
+            //"args": ["output_image/noised-64_color.png", "histogram"],
+            "args": ["output_image/lena-16.png", "convolute", "-d", "3", "--kernel", "-1.0,0.0,1.0,-2.0,0.0,2.0,-1.0,0.0,1.0"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'ruido_gaussiano'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=ruido_gaussiano",
+                    "--package=ruido_gaussiano"
+                ],
+                "filter": {
+                    "name": "ruido_gaussiano",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

@@ -5,3 +5,9 @@
 BitMapManipulator/target/
 BitMapManipulator/img_out/
 BitMapManipulator/debug/
+
+RuidoGaussiano/target/
+RuidoGaussiano/img_out/
+RuidoGaussiano/debug/
+RuidoGaussiano/input
+RuidoGaussiano/output_image

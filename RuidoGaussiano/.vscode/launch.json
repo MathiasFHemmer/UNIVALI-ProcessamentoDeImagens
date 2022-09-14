@@ -21,7 +21,8 @@
             },
             //"args": ["input/original.png", "gaussian-noise", "-s", "64"],
             //"args": ["output_image/noised-64_color.png", "histogram"],
-            "args": ["output_image/lena-16.png", "convolute", "-d", "3", "--kernel", "-1.0,0.0,1.0,-2.0,0.0,2.0,-1.0,0.0,1.0"],
+            //"args": ["output_image/lena-16.png", "convolute", "-d", "3", "--kernel", "-1.0,0.0,1.0,-2.0,0.0,2.0,-1.0,0.0,1.0"],
+            "args": ["input/bebe.jpeg", "--show-image", "edge-detection", "-s", "2"],
             "cwd": "${workspaceFolder}"
         },
         {

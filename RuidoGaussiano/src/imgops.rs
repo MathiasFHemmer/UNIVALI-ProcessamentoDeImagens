@@ -1,24 +1,24 @@
-use crate::hmath;
+use crate::{hmath, args::SobelKernelSize};
 
 use image::{DynamicImage, GenericImageView, Rgb};
-use hmath::{normal_map_2d, DensePixel, kernel_blur_gaussian, kernel_sobel_vertical_3, kernel_sobel_horizontal_3};
+use hmath::{normal_map_2d, DensePixel, kernel_blur_gaussian};
 
 pub fn white_noise_generator(original: &image::DynamicImage, std_dev: f64, gray: bool) -> DynamicImage{
     let image_to_use = match gray { true => original.grayscale(), false => original.clone() };
 
-    let dimensions = image_to_use.dimensions();
-    let mut gaussian_image = image::RgbImage::new(dimensions.0,dimensions.1);
+    let (w, h) = image_to_use.dimensions();
+    let mut gaussian_image = image::RgbImage::new(w,h);
 
-    let normal_distribution_map = normal_map_2d(dimensions.0, dimensions.1, std_dev);
+    let normal_distribution_map = normal_map_2d(w, h, std_dev);
     let mut max_values = DensePixel::from_single_i32(i32::min_value());
     let mut min_values = DensePixel::from_single_i32(i32::max_value());
     
     let mut new_pixel = Vec::new();
-    for y in 0..dimensions.0 {
+    for y in 0..h {
         let mut new_pixel_row  = Vec::new();
-        for x in 0..dimensions.1{
+        for x in 0..w{
             let pixel = image_to_use.get_pixel(x, y);
-            let noise = normal_distribution_map[y as usize][x as usize];
+            let noise = normal_distribution_map[x as usize][y as usize];
             
             let dense_pixel = DensePixel::from_i32(pixel[0] as i32 + noise, pixel[1] as i32 + noise, pixel[2] as i32 + noise);
             max_values = max_values.max(&dense_pixel);
@@ -29,8 +29,8 @@ pub fn white_noise_generator(original: &image::DynamicImage, std_dev: f64, gray:
         new_pixel.push(new_pixel_row);
     }
 
-    for y in 0..dimensions.0 {
-        for x in 0..dimensions.1{
+    for y in 0..h {
+        for x in 0..w{
             let noise = &new_pixel[y as usize][x as usize];
             let mapped_pixel = DensePixel::from_minmax_limit(noise, &min_values, &max_values, 255.0);
             gaussian_image.put_pixel(x, y, image::Rgb([mapped_pixel.r as u8, mapped_pixel.r as u8, mapped_pixel.r as u8]));
@@ -66,9 +66,9 @@ pub fn convolute(mask: Vec<Vec<f32>>, image: &DynamicImage) -> DynamicImage{
             }
         }
 
-        let mut avarage = (sum / mask.len() as f32) as u8;
+        let mut avarage = (sum / mask.len() as f32).abs() as u8;
         if total > 0.0 {
-            avarage = (sum / total) as u8;
+            avarage = (sum / total).abs() as u8;
         }
 
         let convoluted_pixel = Rgb([avarage as u8, avarage as u8, avarage as u8]);
@@ -77,14 +77,20 @@ pub fn convolute(mask: Vec<Vec<f32>>, image: &DynamicImage) -> DynamicImage{
     return image::DynamicImage::ImageRgb8(convoluted_image);
 }
 
-pub fn edge_detection(image: &DynamicImage, std_dev: f64) -> DynamicImage{
+pub fn edge_detection(image: &DynamicImage, std_dev: f64, kernel_size: SobelKernelSize) -> DynamicImage{
     let grayscale_image = image.grayscale();
 
     let noised_image = white_noise_generator(&grayscale_image, std_dev, true);
 
     let blur_convolution = kernel_blur_gaussian();    
-    let vertical_edge_mask = kernel_sobel_vertical_3();
-    let horizontal_edge_mask = kernel_sobel_horizontal_3();
+    let vertical_edge_mask = match kernel_size {
+        SobelKernelSize::Small => hmath::kernel_sobel_vertical_3(),
+        SobelKernelSize::Medium => hmath::kernel_sobel_vertical_5(),
+    };
+    let horizontal_edge_mask = match kernel_size {
+        SobelKernelSize::Small => hmath::kernel_sobel_horizontal_3(),
+        SobelKernelSize::Medium => hmath::kernel_sobel_horizontal_5(),
+    };
     
     let blurred_image = convolute(blur_convolution, &noised_image);
     let horizontal_edges = convolute(horizontal_edge_mask, &blurred_image);

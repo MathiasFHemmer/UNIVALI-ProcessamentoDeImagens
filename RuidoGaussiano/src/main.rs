@@ -5,8 +5,8 @@ mod imgops;
 use std::{collections::HashMap, path::PathBuf};
 use image::{GenericImageView, DynamicImage};
 use clap::Parser;
-use args::{Arguments, GaussianNoiseCommand, ConvoluteCommand, EdgeDetectionCommand};
-use hmath::{parse_convolution_command};
+use args::{Arguments, GaussianNoiseCommand, ConvoluteCommand, EdgeDetectionCommand, SobelKernelSize, HistogramCommand};
+use hmath::{parse_convolution_command, psnr};
 use imgops::{edge_detection, convolute};
 use show_image::{create_window, event};
 use plotters::prelude::*;
@@ -22,7 +22,7 @@ fn main() {
 
     match operation {
         args::OperationType::GaussianNoise(cmd) => gaussian_noise_command_handler(&args, &cmd),
-        args::OperationType::Histogram(_) => histogram_command_handler(&args),
+        args::OperationType::Histogram(cmd) => histogram_command_handler(&args, &cmd),
         args::OperationType::Convolute(cmd) => convolute_command_handler(&args, &cmd),
         args::OperationType::EdgeDetection(cmd) => edge_detection_command_handler(&args, &cmd)
     }
@@ -50,17 +50,28 @@ fn gaussian_noise_command_handler(args: &Arguments, cmd: &GaussianNoiseCommand){
     let std_dev = cmd.std_dev as f64;
     let img_out = imgops::white_noise_generator(&img, std_dev, cmd.grayscale);
 
+    let psnr = psnr(&img, &img_out);
+    println!("PSNR: {}", psnr);
+
     match args.show_image {
         true => show_image(img, img_out),
         false => img_out.save(get_image_output_folder(&args)).unwrap(),
     }
 }
 
-fn histogram_command_handler(args: &Arguments){
+fn histogram_command_handler(args: &Arguments, cmd: &HistogramCommand){
     let folder = get_image_output_folder(args);
     let root = BitMapBackend::new(&folder, (640, 480)).into_drawing_area();
 
-    let data = create_histogram_data(args);
+    let image_folder = &args.image_folder;
+    let img = image::open(image_folder).expect("File not found!");
+
+    let img = match cmd.grayscale {
+        true => img.grayscale(),
+        false => img,
+    };
+
+    let data = create_histogram_data(&img);
 
     let max = data.iter()
     .fold(HashMap::<u8, usize>::new(), |mut m, x| {
@@ -101,8 +112,7 @@ fn histogram_command_handler(args: &Arguments){
     match args.show_image {
         true => {
             let image = image::open(&folder).unwrap();
-            let original = image::open(&args.image_folder).expect("File not found!");
-            show_image(original, image);
+            show_image(img, image);
             std::fs::remove_file(&folder).unwrap();
             ()
         },
@@ -110,13 +120,10 @@ fn histogram_command_handler(args: &Arguments){
     }
 }
 
-fn create_histogram_data(args: &Arguments) -> Vec<u8>{
-    let image_folder = &args.image_folder;
-    let img = image::open(image_folder).expect("File not found!");
-
+fn create_histogram_data(image: &DynamicImage) -> Vec<u8>{
     let mut histogram = Vec::new();
 
-    for (_, _ , pixel) in img.pixels(){
+    for (_, _ , pixel) in image.pixels(){
         histogram.push(pixel[0]);
     }
 
@@ -141,7 +148,8 @@ fn edge_detection_command_handler(args: &Arguments, cmd: &EdgeDetectionCommand){
     let image = image::open(image_folder).unwrap();
     
     let std_dev = cmd.std_dev.unwrap_or(16) as f64;
-    let image_output = edge_detection(&image, std_dev);
+    let kernel = cmd.kernel_size.clone().unwrap_or(SobelKernelSize::Small);
+    let image_output = edge_detection(&image, std_dev, kernel);
 
     match args.show_image {
         true => show_image(image, image_output),

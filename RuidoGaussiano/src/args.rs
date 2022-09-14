@@ -1,3 +1,5 @@
+use std::{str::FromStr};
+
 use clap:: {
     Args,
     Parser,
@@ -43,6 +45,8 @@ pub struct GaussianNoiseCommand{
 
 #[derive(Debug, Args)]
 pub struct HistogramCommand{
+    #[clap(short, long, default_value_t=false, action)]
+    pub grayscale: bool
 }
 
 #[derive(Debug, Args)]
@@ -56,5 +60,25 @@ pub struct ConvoluteCommand{
 #[derive(Debug, Args)]
 pub struct EdgeDetectionCommand{
     #[clap(short, long)]
-    pub std_dev: Option<u16>
+    pub std_dev: Option<u16>,
+    #[clap(short, long)]
+    pub kernel_size: Option<SobelKernelSize>
 }
+
+#[derive(Debug, Clone)]
+pub enum SobelKernelSize{
+    Small,
+    Medium
+}
+impl FromStr for SobelKernelSize {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "3" => Ok(SobelKernelSize::Small),
+            "5"=> Ok(SobelKernelSize::Medium),
+            _ => Err("Invalid kernel size (use 3 or 5)")
+        }
+    }
+}
+

@@ -1,4 +1,5 @@
-use rand_distr::{Normal, Distribution};
+use image::{DynamicImage, GenericImageView};
+use rand_distr::{Normal, Distribution, num_traits::Pow};
 
 use crate::args::ConvoluteCommand;
 
@@ -104,7 +105,7 @@ pub fn kernel_blur_gaussian() -> Vec<Vec<f32>>{
         ];
 }
 
-pub fn kernel_sobel_vertical_3() -> Vec<Vec<f32>> {
+pub fn kernel_sobel_vertical_5() -> Vec<Vec<f32>> {
     return vec![
         vec![2.0, 1.0, 0.0, -1.0, -2.0], 
         vec![2.0, 1.0, 0.0, -1.0, -2.0], 
@@ -113,14 +114,55 @@ pub fn kernel_sobel_vertical_3() -> Vec<Vec<f32>> {
         vec![2.0, 1.0, 0.0, -1.0, -2.0]];
 }
 
-pub fn kernel_sobel_horizontal_3() -> Vec<Vec<f32>> {
+pub fn kernel_sobel_horizontal_5() -> Vec<Vec<f32>> {
     return vec![
         vec![2.0, 2.0, 4.0, 2.0, 2.0], 
         vec![1.0, 1.0, 2.0, 1.0, 1.0], 
         vec![0.0, 0.0, 0.0, 0.0, 0.0],
         vec![-1.0, -1.0, -2.0, -1.0, -1.0],
         vec![-2.0, -2.0, -4.0, -2.0, -2.0]];
-} 
+}
+pub fn kernel_sobel_horizontal_3() -> Vec<Vec<f32>> {
+     return vec![
+        vec![1.0, 2.0, 1.0], 
+        vec![0.0, 0.0, 0.0], 
+        vec![-1.0, -2.0, -1.0]];
+    }
+pub fn kernel_sobel_vertical_3() -> Vec<Vec<f32>> {
+    return vec![
+        vec![1.0, 0.0, -1.0], 
+        vec![2.0, 0.0, -2.0], 
+        vec![1.0, 0.0, -1.0]];
+}
 
-//let horizontal_edge_mask = vec![vec![-1.0, -2.0, -1.0], vec![0.0, 0.0, 0.0], vec![1.0, 2.0, 1.0]];
-//let vertical_edge_mask = vec![vec![-1.0, 0.0, 1.0], vec![-2.0, 0.0, 2.0], vec![-1.0, 0.0, -1.0]];
+pub fn psnr(original_image: &DynamicImage, processed_image: &DynamicImage) -> f64{
+    let dimensions = original_image.dimensions();
+
+    let max_intensity: f64 = match original_image {
+        DynamicImage::ImageLuma8(_) => (u8::MAX as f64).pow(2),
+        DynamicImage::ImageLumaA8(_) => (u8::MAX as f64).pow(2), 
+        DynamicImage::ImageRgb8(_) => (u8::MAX as f64).pow(2),
+        DynamicImage::ImageRgba8(_) => (u8::MAX as f64).pow(2), 
+        DynamicImage::ImageLuma16(_) => (u16::MAX as f64).pow(2),
+        DynamicImage::ImageLumaA16(_) => (u16::MAX as f64).pow(2),
+        DynamicImage::ImageRgb16(_) => (u16::MAX as f64).pow(2),
+        DynamicImage::ImageRgba16(_) => (u16::MAX as f64).pow(2),
+        DynamicImage::ImageRgb32F(_) => (u32::MAX as f64).pow(2),
+        DynamicImage::ImageRgba32F(_) => (u32::MAX as f64).pow(2),
+        _ => 0.0,
+    };
+
+    let avarage_factor = 1.0 / (dimensions.0 * dimensions.1) as f64;
+
+    let mut sum = 0f64;
+    for (x, y, o_pixel) in original_image.pixels(){
+        let p_pixel = processed_image.get_pixel(x, y);
+        sum += (o_pixel[0] as f64 - p_pixel[0] as f64).pow(2);
+    }
+    
+    let mse = sum * avarage_factor;
+    let ratio = max_intensity / mse;
+
+
+    return 10.0 * ratio.log10();
+}

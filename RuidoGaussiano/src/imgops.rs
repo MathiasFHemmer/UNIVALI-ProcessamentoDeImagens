@@ -33,7 +33,7 @@ pub fn white_noise_generator(original: &image::DynamicImage, std_dev: f64, gray:
         for x in 0..w{
             let noise = &new_pixel[y as usize][x as usize];
             let mapped_pixel = DensePixel::from_minmax_limit(noise, &min_values, &max_values, 255.0);
-            gaussian_image.put_pixel(x, y, image::Rgb([mapped_pixel.r as u8, mapped_pixel.r as u8, mapped_pixel.r as u8]));
+            gaussian_image.put_pixel(x, y, image::Rgb([mapped_pixel.r as u8, mapped_pixel.g as u8, mapped_pixel.b as u8]));
         }
     }   
     return DynamicImage::ImageRgb8(gaussian_image);

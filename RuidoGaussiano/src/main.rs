@@ -5,9 +5,10 @@ mod imgops;
 use std::{collections::HashMap, path::PathBuf};
 use image::{GenericImageView, DynamicImage};
 use clap::Parser;
-use args::{Arguments, GaussianNoiseCommand, ConvoluteCommand, EdgeDetectionCommand, SobelKernelSize, HistogramCommand};
+use args::{Arguments, GaussianNoiseCommand, ConvoluteCommand, EdgeDetectionCommand, SobelKernelSize, HistogramCommand, HistogramNoiseCommand};
 use hmath::{parse_convolution_command, psnr};
 use imgops::{edge_detection, convolute};
+use rand_distr::Normal;
 use show_image::{create_window, event};
 use plotters::prelude::*;
 
@@ -24,9 +25,72 @@ fn main() {
         args::OperationType::GaussianNoise(cmd) => gaussian_noise_command_handler(&args, &cmd),
         args::OperationType::Histogram(cmd) => histogram_command_handler(&args, &cmd),
         args::OperationType::Convolute(cmd) => convolute_command_handler(&args, &cmd),
-        args::OperationType::EdgeDetection(cmd) => edge_detection_command_handler(&args, &cmd)
+        args::OperationType::EdgeDetection(cmd) => edge_detection_command_handler(&args, &cmd),
+        args::OperationType::HistogramNoise(cmd) => hist(&cmd)
     }
     return;
+}
+
+fn hist(cmd: &HistogramNoiseCommand){
+    let mut data = vec![0];
+    let normal = Normal::new(2f64, cmd.desv as f64).unwrap();
+    for _ in 0..cmd.size{
+        data.push(rand_distr::Distribution::sample(&normal, &mut rand::thread_rng()) as i32);
+    }
+
+    let root = BitMapBackend::new("___data.png", (640, 480)).into_drawing_area();
+
+    let max = data.iter()
+    .fold(HashMap::<i32, usize>::new(), |mut m, x| {
+        *m.entry(*x).or_default() += 1;
+        m
+    })
+    .into_iter()
+    .max_by_key(|(_, v)| *v)
+    .map(|(_, v)| v)
+    .unwrap();
+
+    root.fill(&WHITE).unwrap();
+
+    let mut chart = ChartBuilder::on(&root)
+        .x_label_area_size(25)
+        .y_label_area_size(25)
+        .margin(5)
+        .caption("Histograma", ("sans-serif", 50.0))
+        .build_cartesian_2d(((-4*(cmd.desv as i32)..4*(cmd.desv as i32))).into_segmented(), 0u32..((max + max/10) as u32)).unwrap();
+
+    chart
+        .configure_mesh()
+        .disable_x_mesh()
+        .bold_line_style(&WHITE.mix(0.3))
+        .y_desc("Count")
+        .x_desc("Bucket")
+        .axis_desc_style(("sans-serif", 15))
+        .draw().unwrap();
+
+    chart.draw_series(
+        Histogram::vertical(&chart)
+            .style(RED.mix(0.5).filled())
+            .data(data.iter().map(|x| (*x as i32, 1))),
+    ).unwrap();
+
+    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+
+    let image = image::open("___data.png").unwrap();
+
+    let original_window = create_window("Imagem Original", Default::default()).unwrap();
+
+    original_window.set_image("v1", image).unwrap();
+
+    for event in original_window.event_channel().unwrap() {
+        if let event::WindowEvent::KeyboardInput(event) = event {
+            if event.input.key_code == Some(event::VirtualKeyCode::Escape) && event.input.state.is_pressed() {
+                break;
+            }
+        }
+    }
+
+
 }
 
 fn get_image_output_folder(args: &Arguments) -> PathBuf{

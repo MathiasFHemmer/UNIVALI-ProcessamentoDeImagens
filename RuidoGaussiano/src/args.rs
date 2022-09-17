@@ -30,7 +30,16 @@ pub enum OperationType{
     /// Applies a convolution operator based on supplied Kernel. Kernel must be an odd-sized 2N Vector (1x1, 3x3, 5x5...)
     Convolute(ConvoluteCommand),
     /// Tries to do an edge detection
-    EdgeDetection(EdgeDetectionCommand)
+    EdgeDetection(EdgeDetectionCommand),
+    HistogramNoise(HistogramNoiseCommand)
+}
+
+#[derive(Debug, Args)]
+pub struct HistogramNoiseCommand{
+    #[clap(short, long)]
+    pub size: u32,
+    #[clap(short, long)]
+    pub desv: u16
 }
 
 #[derive(Debug, Args)]
